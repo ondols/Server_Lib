@@ -166,3 +166,29 @@ private:
 };
 
 #define g_MemoryPool() CBMemoryPool::GetInstance()
+
+class CBLock
+{
+public:
+	CBLock() { InitializeCriticalSection(&m_CS); }
+	~CBLock() { DeleteCriticalSection(&m_CS); }
+
+public:
+	void Lock() { EnterCriticalSection(&m_CS); }	// CriticalSection Lock.
+	void UnLock() { LeaveCriticalSection(&m_CS); }	// CriticalSection UnLock.
+
+	CRITICAL_SECTION* GetCritical() { return &m_CS; } // CriticalSection Data return.
+
+private:
+	CRITICAL_SECTION m_CS;		// CriticalSection Data.
+};
+
+class CBAutoLock
+{
+public:
+	CBAutoLock(CBLock* lock) : m_pLock(lock) { m_pLock->Lock(); }
+	~CBAutoLock() { m_pLock->UnLock(); }
+
+private:
+	CBLock* m_pLock;	// BaseCriticalSection Data.
+};
