@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 // interlocked slist.
 class CBSList
 {
@@ -47,17 +49,21 @@ class CBBuffer
 	, public CBRefCount
 {
 public:
-	CBBuffer(size_t len) : m_pBuffer(nullptr), m_nLen(len), m_nUseLen(0)
+	CBBuffer(size_t len) : m_pBuffer(nullptr), m_nLen(len), m_nUseLen(0), m_bRead(false)
 	{
 		m_pBuffer = new char[len];
 	}
+	CBBuffer(char* pBuf, size_t len) : m_pBuffer(pBuf), m_nLen(len), m_nUseLen(0), m_bRead(true) {}
 	~CBBuffer()
 	{
-		if (m_pBuffer)
+		if (m_bRead == false)
 		{
-			delete[] m_pBuffer;
-			m_pBuffer = nullptr;
-		}
+			if (m_pBuffer)
+			{
+				delete[] m_pBuffer;
+				m_pBuffer = nullptr;
+			}
+		}		
 	}
 
 	char* GetBuffer() { return m_pBuffer; }
@@ -79,10 +85,72 @@ public:
 		CopyMemory(m_pBuffer, data, len);
 	}
 
+	template<class Type>
+	void operator << (Type n)
+	{
+		if (m_bRead == true)
+		{
+			return;
+		}
+		_SetBufData(n);
+	}
+	void operator << (std::string& str)
+	{
+		if (m_bRead == true)
+		{
+			return;
+		}
+		int curSize = (int)str.size();
+		_SetBufData(curSize);
+		_SetBufData(str.c_str(), curSize);
+	}
+
+	template<class Type>
+	void operator >> (Type& n)
+	{
+		if (m_bRead == false)
+		{
+			return;
+		}
+		_GetBufData(n);
+	}
+	void operator >> (std::string& str)
+	{
+		if (m_bRead == false)
+		{
+			return;
+		}
+		int size = 0;
+		_GetBufData(size);
+		str.assign(m_pBuffer + m_nUseLen, size);
+		m_nUseLen += size;
+	}
+
+private:
+	template<class Type>
+	void _SetBufData(Type n)
+	{
+		*(Type*)(m_pBuffer + m_nUseLen) = n;
+		m_nUseLen += sizeof(Type);
+	}
+	void _SetBufData(const char* data, int size)
+	{
+		memcpy_s(m_pBuffer + m_nUseLen, m_nLen - m_nUseLen, data, size);
+		m_nUseLen += size;
+	}
+
+	template<class Type>
+	void _GetBufData(Type& n)
+	{
+		n = *(Type*)(m_pBufffer + m_nUseLen);
+		m_nUseLen += sizeof(Type);
+	}
+
 private:
 	char* m_pBuffer;
 	size_t m_nLen;
 	size_t m_nUseLen;
+	bool m_bRead;
 };
 
 enum eMEMORY_INFO
