@@ -111,7 +111,7 @@ public:
 			boost::bind(&CBBaseSession::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
 		);
 	}
-	bool PostSend(sPacketHeader* packetdata)
+	bool PostSend(sPacketHeader* packetdata, int size)
 	{
 		if (packetdata == nullptr)
 		{
@@ -122,12 +122,12 @@ public:
 			return false;
 		}
 
-		CBBuffer* pSendBuf = g_MemoryPool()->AllocMemory(packetdata->size);
+		CBBuffer* pSendBuf = g_MemoryPool()->AllocMemory(size);
 		if (pSendBuf == nullptr)
 		{
 			return false;
 		}
-		pSendBuf->SetData((char*)packetdata, packetdata->size);
+		pSendBuf->SetData((char*)packetdata, size);
 		pSendBuf->ReferenceIncrement();
 
 		boost::asio::async_write(

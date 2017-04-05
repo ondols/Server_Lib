@@ -71,6 +71,9 @@ public:
 	size_t GetSize() { return m_nLen; }
 	size_t GetUseSize() { return m_nUseLen; }
 	void ClearBuffer() { ZeroMemory(m_pBuffer, sizeof(char) * m_nLen); m_nUseLen = 0; }
+	void SetPacketLenOffset() { m_nUseLen += ePACKET_SIZE; }
+	void SetPacketLen(unsigned short len) { *(unsigned short*)(m_pBuffer) = len; }
+	void SetPacketID(unsigned short id) { *(unsigned short*)(m_pBuffer + ePACKET_SIZE) = id; }
 	void SetData(char* data, size_t len)
 	{
 		if (m_pBuffer == nullptr)
@@ -81,8 +84,22 @@ public:
 		{
 			return;
 		}
-		m_nUseLen = len;
 		CopyMemory(m_pBuffer, data, len);
+		m_nUseLen = len;
+		SetPacketLen(len);
+	}
+	void AddData(char* data, size_t len)
+	{
+		if (m_pBuffer == nullptr)
+		{
+			return;
+		}
+		if (len > m_nLen)
+		{
+			return;
+		}
+		CopyMemory(m_pBuffer + m_nUseLen, data, len);
+		m_nUseLen += len;
 	}
 
 	template<class Type>
