@@ -187,8 +187,8 @@ public:
 	inline boost::asio::ip::tcp::socket& GetSocket() { return m_Socket; }
 	inline void SetService(bool flag) { m_bService = flag; }
 	inline bool GetService() { return m_bService; }
-	inline void SetSessionNo(int no) { m_nSessionNo = no; }
-	inline int GetSessionNo() { return m_nSessionNo; }
+	inline void SetSessionNo(UINT64 no) { m_nSessionNo = no; }
+	inline UINT64 GetSessionNo() { return m_nSessionNo; }
 
 protected:
 	// virtual function.
@@ -301,7 +301,7 @@ private:
 		if (bytes_transferred == 0)
 		{
 			// close session.
-			printf("sent by zero. session no : %d \n", GetSessionNo());
+			printf("sent by zero. session no : %I64d \n", GetSessionNo());
 			close_session();
 			return;
 		}
@@ -318,7 +318,7 @@ private:
 		}
 
 		// close session.
-		printf("close session. session no : %d \n", GetSessionNo());
+		printf("close session. session no : %I64d \n", GetSessionNo());
 
 		// socket close.
 		m_Socket.close();
@@ -335,7 +335,7 @@ protected:
 	size_t m_nBufOffset;
 	bool m_bService;
 	bool m_bIsFinalize;
-	int m_nSessionNo;
+	UINT64 m_nSessionNo;
 };
 
 // WorkThread.
@@ -426,7 +426,7 @@ protected:
 	{
 		if(reaccept == true)
 		{
-			printf("Post Reaccept, Seq : %d \n", m_nSeqNumber);
+			printf("Post Reaccept, Seq : %I64d \n", m_nSeqNumber);
 		}		
 
 		m_Acceptor.async_accept(session->GetSocket(),
@@ -454,7 +454,7 @@ private:
 
 protected:
 	// value.
-	int m_nSeqNumber;
+	volatile LONG64 m_nSeqNumber;
 	CBWorkThread m_WorkThread;
 	boost::asio::ip::tcp::acceptor m_Acceptor;	
 };

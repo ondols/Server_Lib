@@ -159,7 +159,7 @@ private:
 	template<class Type>
 	void _GetBufData(Type& n)
 	{
-		n = *(Type*)(m_pBufffer + m_nUseLen);
+		n = *(Type*)(m_pBuffer + m_nUseLen);
 		m_nUseLen += sizeof(Type);
 	}
 
